@@ -1,0 +1,21 @@
+version: '2.1'
+
+services:
+  build:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: usps
+    entrypoint:
+      - bash
+      - -c
+      - dep ensure && go build cmd/usps-util.go
+    volumes:
+      - ..:/go/src/usps/
+
+  test:
+    extends:
+      service: build
+    entrypoint: go test
+    volumes:
+      - ..:/go/src/usps/
