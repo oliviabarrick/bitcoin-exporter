@@ -1,0 +1,7 @@
+FROM golang:1.9.2
+
+WORKDIR /go/src/github.com/justinbarrick/bitcoin-exporter
+
+COPY . .
+
+RUN go get -d -t ./...

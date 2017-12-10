@@ -4,18 +4,12 @@ services:
   build:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
-    image: usps
-    entrypoint:
-      - bash
-      - -c
-      - dep ensure && go build cmd/usps-util.go
+      dockerfile: docker/Dockerfile.build
+    entrypoint: [ "go", "build", "cmd/bitcoin-exporter.go" ]
     volumes:
-      - ..:/go/src/usps/
+      - ..:/go/src/github.com/justinbarrick/bitcoin-exporter
 
   test:
     extends:
       service: build
-    entrypoint: go test
-    volumes:
-      - ..:/go/src/usps/
+    entrypoint: [ "go", "test", "./..." ]
