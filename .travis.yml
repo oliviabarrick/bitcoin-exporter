@@ -1,6 +1,33 @@
+sudo: required
+
+services:
+- docker
+
+os:
+- linux
+
 language: go
 
 go:
-  - 1.9
+- 1.9
 
-script: go test ./...
+env:
+- KUBECONFIG=kubeconfig
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .kubeconfig.enc -out $KUBECONFIG -d
+- curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+- chmod +x ./kubectl
+- sudo mv ./kubectl /usr/local/bin/kubectl
+
+script:
+- echo $(git rev-list --count HEAD)-$(git describe --always --long) > version
+- go test ./...
+- docker build -t justinbarrick/bitcoin-exporter:$(cat version) -f docker/Dockerfile .
+
+after_success:
+- if [ "$TRAVIS_BRANCH" == "master" ]; then
+  docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+  docker push justinbarrick/bitcoin-exporter:$(cat version);
+  kubectl set image deployment/bitcoin-exporter bitcoin-exporter=justinbarrick/bitcoin-exporter:$(cat version)
+  fi
