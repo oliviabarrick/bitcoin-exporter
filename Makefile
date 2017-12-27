@@ -1,10 +1,12 @@
+VERSION=$(shell git rev-list --count HEAD)-$(shell git describe --always --long)
+
 .PHONY: build
 build:
 	docker-compose -f docker/stack.yml build
 
 .PHONY: build-image
 build-image:
-	docker build -t bitcoin-exporter -f docker/Dockerfile .
+	docker build -t justinbarrick/bitcoin-exporter:$(VERSION) -f docker/Dockerfile .
 
 .PHONY: build-bin
 build-bin:
@@ -26,3 +28,16 @@ status:
 .PHONY: logs
 logs:
 	docker-compose -f docker/stack.yml logs -f bitcoin-exporter
+
+.PHONY: push-image
+push-image: build-image
+	docker push justinbarrick/bitcoin-exporter:$(VERSION)
+
+.PHONY: initial-deploy
+initial-deploy: push-image
+	kubectl create configmap bitcoin-exporter-config --from-file=config/bitcoin-exporter.yml
+	sed 's/VERSION/$(VERSION)/g' docker/bitcoin-exporter-kubernetes.yml |kubectl apply -f -
+
+.PHONY: update-deploy
+update-deploy:
+	kubectl set image deployment/bitcoin-exporter-deployment bitcoin-exporter=justinbarrick/bitcoin-exporter:$(VERSION)
