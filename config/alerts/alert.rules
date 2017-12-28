@@ -1,10 +1,17 @@
 groups:
 - name: alerts
   rules:
-  - alert: bitcoin_decreasing
-    expr: ((bitcoin_exporter_ticker{currency=~".*-USD",side="sell"} + delta(bitcoin_exporter_ticker{currency=~".*-USD",side="sell"}[5m])) / bitcoin_exporter_ticker{currency=~".*-USD",side="sell"}) < 0.95
+  - alert: coin_decreasing
+    expr: (bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"} / max_over_time(bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"}[24h])) < 0.95
     labels:
       severity: page
     annotations:
-      summary: "{{ $labels.currency }} sell price dropping by more than 5%"
-      description: "{{ $labels.currency}} sell price dropped by more than 5%"
+      summary: "{{ $labels.currency }} sell price is greater than 5% lower than the 24 hour maximum."
+      description: "{{ $labels.currency }} sell price is greater than 5% lower than the 24 hour maximum."
+  - alert: coin_maxed
+    expr: (bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"} / max_over_time(bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"}[24h])) > 0.99
+    labels:
+      severity: page
+    annotations:
+      summary: "{{ $labels.currency }} is within 1% of the daily maximum."
+      description: "{{ $labels.currency }} is within 1% of the daily maximum."
