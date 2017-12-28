@@ -2,16 +2,16 @@ groups:
 - name: alerts
   rules:
   - alert: coin_decreasing
-    expr: (bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"} / max_over_time(bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"}[24h])) < 0.95
+    expr: ((bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"} / max_over_time(bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"}[24h]))) * 100 < 95
     labels:
       severity: page
     annotations:
-      summary: "{{ $labels.currency }} sell price is greater than 5% lower than the 24 hour maximum."
-      description: "{{ $labels.currency }} sell price is greater than 5% lower than the 24 hour maximum."
+      summary: '{{ $labels.currency }} sell price is {{ printf "%.2f" $value }}% of the 24 hour maximum.'
+      description: '{{ $labels.currency }} sell price is {{ printf "%.2f" $value }}% of the 24 hour maximum.'
   - alert: coin_maxed
     expr: (bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"} / max_over_time(bitcoin_exporter_ticker{currency =~ ".*-USD",side="sell"}[24h])) > 0.99
     labels:
       severity: page
     annotations:
-      summary: "{{ $labels.currency }} is within 1% of the daily maximum."
-      description: "{{ $labels.currency }} is within 1% of the daily maximum."
+      summary: '{{ $labels.currency }} is {{ printf "%.2f" $value }}% of the daily maximum.'
+      description: '{{ $labels.currency }} is within {{ printf "%.2f" $value }}% of the daily maximum.'
