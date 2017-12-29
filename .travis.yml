@@ -15,6 +15,7 @@ before_install:
 - wget -q ${HELM_URL}/${HELM_TGZ}
 - tar xzfv ${HELM_TGZ}
 - PATH=`pwd`/linux-amd64/:$PATH
+- curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
 install:
 - go get -t -v ./...
 script:
@@ -22,8 +23,8 @@ script:
 - go test ./...
 - make build-image
 - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-- mkdir ~/.kube/
 - openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/secrets.tar.gz.enc -out secrets.tar.gz -d && tar xzf secrets.tar.gz
+- kubectl get pods
 - helm init --client-only
 - if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make deploy; fi
 notifications:
