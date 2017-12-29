@@ -35,4 +35,4 @@ push-image:
 
 .PHONY: deploy
 deploy:
-	cd helm; helm --debug upgrade --set image.tag=$(VERSION) trendy-seastar .
+	cd helm; helm upgrade --set image.tag=$(VERSION) trendy-seastar .
