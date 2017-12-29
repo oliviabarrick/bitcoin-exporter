@@ -18,9 +18,11 @@ before_install:
 install:
 - go get -t -v ./...
 script:
+# Test
 - go test ./...
 - make build-image
-after_success:
+
+# Deploy
 - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
 - mkdir ~/.kube/
 - openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv
