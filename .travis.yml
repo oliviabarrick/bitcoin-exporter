@@ -17,7 +17,6 @@ env:
   - HELM_TGZ=helm-v2.7.2-linux-amd64.tar.gz
 
 before_install:
-- docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
 - wget -q ${HELM_URL}/${HELM_TGZ}
 - tar xzfv ${HELM_TGZ}
 - PATH=`pwd`/linux-amd64/:$PATH
@@ -31,6 +30,7 @@ script:
 - make build-image
 
 after_success:
+- docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
 - openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/kubeconfig.enc -out kubeconfig -d
 - openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/bitcoin-exporter.yml.enc -out helm/bitcoin-exporter.yml -d
-- if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make deploy; fi
+- if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make KUBECONFIG=kubeconfig deploy; fi
