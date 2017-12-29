@@ -23,6 +23,9 @@ before_install:
 - PATH=`pwd`/linux-amd64/:$PATH
 - helm init --client-only
 
+install:
+- go get -t -v ./...
+
 script:
 - go test ./...
 - make build-image
