@@ -1,36 +1,33 @@
 sudo: required
-
 services:
 - docker
-
 os:
 - linux
-
 language: go
-
 go:
 - 1.9
-
 env:
   global:
   - HELM_URL=https://storage.googleapis.com/kubernetes-helm
   - HELM_TGZ=helm-v2.7.2-linux-amd64.tar.gz
-
 before_install:
 - wget -q ${HELM_URL}/${HELM_TGZ}
 - tar xzfv ${HELM_TGZ}
 - PATH=`pwd`/linux-amd64/:$PATH
 - helm init --client-only
-
 install:
 - go get -t -v ./...
-
 script:
 - go test ./...
 - make build-image
-
 after_success:
 - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/kubeconfig.enc -out kubeconfig -d
-- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/bitcoin-exporter.yml.enc -out helm/bitcoin-exporter.yml -d
-- if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make KUBECONFIG=kubeconfig deploy; fi
+- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv
+  -in .travis/kubeconfig.enc -out kubeconfig -d
+- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv
+  -in .travis/bitcoin-exporter.yml.enc -out helm/bitcoin-exporter.yml -d
+- if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make KUBECONFIG=kubeconfig
+  deploy; fi
+notifications:
+  slack:
+    secure: b/ZXwbyjCsobCOaAwgFlmrL5rTvoK4Al/ZXYD2TBwUztMNwlRDDS/xrFrO/t0keGUXZr/BzuXDPnPbNrsCCu/AksykuzM/KKQKpuzyEpfYS1G6jxEwLZY1C19tj0AlWBg09L2wSIcSRqc5z1+2YHEDMjQrQjbtYwbntYF+tlygyBbxxHP+Kv+D9KHqZ61iPrngIKFZkUad9R+HQ2fGaB1emsOwBzpaKUVGlHWcr70kco5B9jFaTQmyCKv9+I+SGCr1OAb6PHkPTFk3eTqYrs1usBIfgl2uv5mbzzAKBgInZ2+/PxpMTEHlhL6F9zWupiDTUOuyzEyJ39ZR2L5G8MFailxSJ0BRdpcTJL9je47Fxnj1BRqIeFKVfPNxeBzjfOfQPMqY/eZLiXft/JPiLz4QerXthF0nqeXRpVkqwOG+LHD41GKSF7dtoh+0njNr6H6wzzu5sWsQybXqpU4cpWbJODypW6tsxbcUYjJAVj87wE3NMTkYTnyKl62TiC1mugcd6kamaQdwA4zQPRW4wo0DrdTuFuachPzETwtXEHv2zRYQvMErR6VN//JXHkmgSra2pPO6jKDUh8zFE2Rwm8bz4kQ/JvO6ZJTzVfmGL9ezvC6/aNz0Cf7FTN5eb3S0D32yHVtVH3S36nzN864e0tQjXLD23eybJxonhPksMNPPA=
