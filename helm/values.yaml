@@ -1,0 +1,9 @@
+replicaCount: 1
+image:
+  repository: justinbarrick/bitcoin-exporter
+  tag: VERSION
+  pullPolicy: IfNotPresent
+service:
+  name: bitcoin-exporter
+  externalPort: 8080
+  internalPort: 8080

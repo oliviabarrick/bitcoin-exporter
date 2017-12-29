@@ -12,18 +12,22 @@ go:
 - 1.9
 
 env:
-- KUBECONFIG=kubeconfig
+  global:
+  - HELM_URL=https://storage.googleapis.com/kubernetes-helm
+  - HELM_TGZ=helm-v2.7.2-linux-amd64.tar.gz
 
 before_install:
-- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/kubeconfig.enc -out $KUBECONFIG -d
-- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/bitcoin-exporter.yml.enc -out config/bitcoin-exporter.yml -d
-- curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-- chmod +x ./kubectl
-- sudo mv ./kubectl /usr/local/bin/kubectl
 - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+- wget -q ${HELM_URL}/${HELM_TGZ}
+- tar xzfv ${HELM_TGZ}
+- PATH=`pwd`/linux-amd64/:$PATH
+- helm init --client-only
 
 script:
 - go test ./...
+- make build-image
 
 after_success:
-- if [ "$TRAVIS_BRANCH" == "master" ]; then make initial-deploy || make update-deploy; fi
+- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/kubeconfig.enc -out kubeconfig -d
+- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/bitcoin-exporter.yml.enc -out helm/bitcoin-exporter.yml -d
+- if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make deploy; fi

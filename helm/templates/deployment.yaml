@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "bitcoin-exporter.fullname" . }}
+  labels:
+    app: {{ template "bitcoin-exporter.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ template "bitcoin-exporter.name" . }}
+        release: {{ .Release.Name }}
+
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        volumeMounts:
+        - name: bitcoin-exporter-config
+          mountPath: /etc/bitcoin-exporter/
+        args: ["/etc/bitcoin-exporter/bitcoin-exporter.yml"]
+      volumes:
+      - name: bitcoin-exporter-config
+        configMap:
+          name: bitcoin-exporter-config-{{ .Release.Name }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "bitcoin-exporter.fullname" . }}
+  labels:
+    app: {{ template "bitcoin-exporter.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    prometheus.io/scrape: "true"
+spec:
+  ports:
+    - port: {{ .Values.service.externalPort }}
+      targetPort: {{ .Values.service.internalPort }}
+      protocol: TCP
+      name: {{ .Values.service.name }}
+  selector:
+    app: {{ template "bitcoin-exporter.name" . }}
+    release: {{ .Release.Name }}

@@ -4,10 +4,6 @@ VERSION=$(shell git rev-list --count HEAD)-$(shell git describe --always --long)
 build:
 	docker-compose -f docker/stack.yml build
 
-.PHONY: build-image
-build-image:
-	docker build -t justinbarrick/bitcoin-exporter:$(VERSION) -f docker/Dockerfile .
-
 .PHONY: build-bin
 build-bin:
 	docker-compose -f docker/docker-compose.yml up --build
@@ -29,15 +25,14 @@ status:
 logs:
 	docker-compose -f docker/stack.yml logs -f bitcoin-exporter
 
+.PHONY: build-image
+build-image:
+	docker build -t justinbarrick/bitcoin-exporter:$(VERSION) -f docker/Dockerfile .
+
 .PHONY: push-image
-push-image: build-image
+push-image:
 	docker push justinbarrick/bitcoin-exporter:$(VERSION)
 
-.PHONY: initial-deploy
-initial-deploy: push-image
-	kubectl create configmap bitcoin-exporter-config --from-file=config/bitcoin-exporter.yml
-	sed 's/VERSION/$(VERSION)/g' docker/bitcoin-exporter-kubernetes.yml |kubectl apply -f -
-
-.PHONY: update-deploy
-update-deploy:
-	kubectl set image deployment/bitcoin-exporter-deployment bitcoin-exporter=justinbarrick/bitcoin-exporter:$(VERSION)
+.PHONY: deploy
+deploy:
+	cd helm; helm upgrade --set image.tag=$(VERSION) trendy-seastar .
