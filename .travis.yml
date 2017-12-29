@@ -18,18 +18,12 @@ before_install:
 install:
 - go get -t -v ./...
 script:
-# Test
 - go test ./...
 - make build-image
-
-# Deploy
+after_success:
 - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
 - mkdir ~/.kube/
-- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv
-  -in .travis/kubeconfig.enc -out ~/.kube/config -d
-- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv
-  -in .travis/bitcoin-exporter.yml.enc -out helm/bitcoin-exporter.yml -d
-- kubectl config view
+- openssl aes-256-cbc -K $encrypted_4484f21cd8cd_key -iv $encrypted_4484f21cd8cd_iv -in .travis/secrets.tar.gz -out secrets.tar.gz -d && tar xzf secrets.tar.gz
 - helm init --client-only
 - if [ "$TRAVIS_BRANCH" == "master" ]; then make push-image && make deploy; fi
 notifications:
