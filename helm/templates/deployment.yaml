@@ -15,6 +15,9 @@ spec:
       labels:
         app: {{ template "bitcoin-exporter.name" . }}
         release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.service.internalPort }}
 
     spec:
       containers:
@@ -41,8 +44,6 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-  annotations:
-    prometheus.io/scrape: "true"
 spec:
   ports:
     - port: {{ .Values.service.externalPort }}
