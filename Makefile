@@ -1,4 +1,5 @@
 VERSION=$(shell git rev-list --count HEAD)-$(shell git describe --always --long)
+DEPLOYMENT=bunking-sponge
 
 .PHONY: build
 build:
@@ -35,4 +36,8 @@ push-image:
 
 .PHONY: deploy
 deploy:
-	cd helm; helm upgrade --set image.tag=$(VERSION) trendy-seastar .
+	helm install --set image.tag=$(VERSION) helm
+
+.PHONY: upgrade-deploy
+upgrade-deploy:
+	helm upgrade --set image.tag=$(VERSION) $(DEPLOYMENT) helm

@@ -4,6 +4,6 @@ image:
   tag: VERSION
   pullPolicy: IfNotPresent
 service:
-  name: bitcoin-exporter
+  name: metrics
   externalPort: 8080
   internalPort: 8080
