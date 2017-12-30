@@ -17,7 +17,7 @@ spec:
         release: {{ .Release.Name }}
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.service.internalPort }}
+        prometheus.io/port: "{{ .Values.service.internalPort }}"
 
     spec:
       containers:
