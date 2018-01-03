@@ -15,6 +15,9 @@ spec:
       labels:
         app: {{ template "bitcoin-exporter.name" . }}
         release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.service.internalPort }}"
 
     spec:
       containers:
@@ -27,6 +30,8 @@ spec:
         - name: bitcoin-exporter-config
           mountPath: /etc/bitcoin-exporter/
         args: ["/etc/bitcoin-exporter/bitcoin-exporter.yml"]
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
       volumes:
       - name: bitcoin-exporter-config
         configMap:
