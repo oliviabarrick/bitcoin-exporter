@@ -1,0 +1,15 @@
+stream
+    |from()
+        .measurement('bitcoin_exporter_ticker')
+    |influxDBOut()
+        .database('metrics')
+        .retentionPolicy('autogen')
+        .measurement('bitcoin_exporter_ticker')
+
+stream
+    |from()
+        .measurement('bitcoin_exporter_current_balance')
+    |influxDBOut()
+        .database('metrics')
+        .retentionPolicy('autogen')
+        .measurement('bitcoin_exporter_current_balance')
