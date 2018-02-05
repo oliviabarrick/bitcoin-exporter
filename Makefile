@@ -1,5 +1,5 @@
 VERSION=$(shell git rev-list --count HEAD)-$(shell git describe --always --long)
-DEPLOYMENT=bunking-sponge
+DEPLOYMENT=bitcoin-exporter
 
 .PHONY: build
 build:
@@ -36,7 +36,7 @@ push-image:
 
 .PHONY: deploy
 deploy:
-	helm install --set image.tag=$(VERSION) helm
+	helm install --set image.tag=$(VERSION) --name $(DEPLOYMENT) helm
 
 .PHONY: upgrade-deploy
 upgrade-deploy:
